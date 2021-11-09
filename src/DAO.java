@@ -59,13 +59,21 @@ public class DAO {
 
 	}
 
-	public void userSelectAll(DefaultTableModel t_model) // 모든 attribute 출력
+	public void userSelectAll(DefaultTableModel t_model, String ord) // 모든 attribute 출력
 	{
 		try {
 			st = con.createStatement();
-			rs = st.executeQuery(
-					"SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
-							+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn;");
+
+			String sql = "SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
+					+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn";
+
+			if (ord == "정렬 없음") {
+				rs = st.executeQuery(sql);
+			} else if (ord == "오름차순") {
+				rs = st.executeQuery(sql + " ORDER BY NAME");
+			} else if (ord == "내림차순") {
+				rs = st.executeQuery(sql + " ORDER BY NAME DESC");
+			}
 
 			for (int i = 0; i < t_model.getRowCount();) // 기존 tuple 지우기
 			{
@@ -86,37 +94,56 @@ public class DAO {
 	}
 
 	// 검색 범위
-	public void userSelect(DefaultTableModel t_model, String sel, String Text) {
+	public void userSelect(DefaultTableModel t_model, String sel, String Text, String ord) {
 		try {
 			st = con.createStatement();
+
+			String sql = "SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
+					+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn";
+
 			if (sel == "부서") {
-				rs = st.executeQuery(
-						"SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
-								+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn WHERE d.DNAME = '"
-								+ Text + "'");
+				if (ord == "정렬 없음") {
+					rs = st.executeQuery(sql + " WHERE d.DNAME = '" + Text + "'");
+				} else if (ord == "오름차순") {
+					rs = st.executeQuery(sql + " WHERE d.DNAME = '" + Text + "'" + " ORDER BY NAME");
+				} else if (ord == "내림차순") {
+					rs = st.executeQuery(sql + " WHERE d.DNAME = '" + Text + "'" + " ORDER BY NAME DESC");
+				}
 			} else if (sel == "성별") {
-				rs = st.executeQuery(
-						"SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
-								+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn WHERE e1.SEX = '"
-								+ Text + "'");
+				if (ord == "정렬 없음") {
+					rs = st.executeQuery(sql + " WHERE e1.SEX = '" + Text + "'");
+				} else if (ord == "오름차순") {
+					rs = st.executeQuery(sql + " WHERE e1.SEX = '" + Text + "'" + " ORDER BY NAME");
+				} else if (ord == "내림차순") {
+					rs = st.executeQuery(sql + " WHERE e1.SEX = '" + Text + "'" + " ORDER BY NAME DESC");
+				}
 			} else if (sel == "연봉") {
-				rs = st.executeQuery(
-						"SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
-								+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn WHERE e1.SALARY > '"
-								+ Text + "'");
+				if (ord == "정렬 없음") {
+					rs = st.executeQuery(sql + " WHERE e1.SALARY > '" + Text + "'");
+				} else if (ord == "오름차순") {
+					rs = st.executeQuery(sql + " WHERE e1.SALARY > '" + Text + "'" + " ORDER BY SALARY");
+				} else if (ord == "내림차순") {
+					rs = st.executeQuery(sql + " WHERE e1.SALARY > '" + Text + "'" + " ORDER BY SALARY DESC");
+				}
 			} else if (sel == "생일") {
-				rs = st.executeQuery(
-						"SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
-								+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn WHERE DATE_FORMAT(e1.BDATE, '%m') = '"
-								+ Text + "'");
-			} else if (sel == "부하직원") {
-				rs = st.executeQuery(
-						"SELECT CONCAT(e1.Fname, \" \", e1.Minit, \" \", e1.Lname) AS NAME, e1.SSN, e1.BDATE, e1.ADDRESS, e1.SEX, e1.SALARY, CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) AS SUPERVISOR, d.DNAME\r\n"
-								+ "FROM  employee e1 inner join department d on e1.Dno = d.Dnumber left outer join employee e2 on e1.super_ssn = e2.ssn  where CONCAT(e2.Fname, \" \", e2.Minit, \" \", e2.Lname) = '"
-								+ Text + "'" + " or e2.Fname = '" + Text + "'" + " or e2.Lname = '" + Text + "'");
+				if (ord == "정렬 없음") {
+					rs = st.executeQuery(sql + " WHERE DATE_FORMAT(e1.BDATE, '%m') = '" + Text + "'");
+				} else if (ord == "오름차순") {
+					rs = st.executeQuery(sql + " WHERE DATE_FORMAT(e1.BDATE, '%m') = '" + Text + "'" + " ORDER BY BDATE");
+				} else if (ord == "내림차순") {
+					rs = st.executeQuery(sql + " WHERE DATE_FORMAT(e1.BDATE, '%m') = '" + Text + "'" + " ORDER BY BDATE DESC");
+				}
+			} else if (sel == "부하직원") { // Fname, Lname, Full name 중 하나 입력하면 검색됨
+				if (ord == "정렬 없음") {
+					rs = st.executeQuery(sql + " WHERE CONCAT(e2.Fname, ' ', e2.Minit, ' ', e2.Lname) = '" + Text + "'" + " or e2.Fname = '" + Text + "'" + " or e2.Lname = '" + Text + "'");
+				} else if (ord == "오름차순") {
+					rs = st.executeQuery(sql + " WHERE CONCAT(e2.Fname, ' ', e2.Minit, ' ', e2.Lname) = '" + Text + "'" + " or e2.Fname = '" + Text + "'" + " or e2.Lname = '" + Text + "'" + " ORDER BY SSN");
+				} else if (ord == "내림차순") {
+					rs = st.executeQuery(sql + " WHERE CONCAT(e2.Fname, ' ', e2.Minit, ' ', e2.Lname) = '" + Text + "'" + " or e2.Fname = '" + Text + "'" + " or e2.Lname = '" + Text + "'" + " ORDER BY SSN DESC");
+				}
+
 			}
-			
-			
+
 			for (int i = 0; i < t_model.getRowCount();) // 기존 tuple 지우기
 			{
 				t_model.removeRow(0);
