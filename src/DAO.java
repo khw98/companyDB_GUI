@@ -162,8 +162,8 @@ public class DAO {
 		}
 	}
 
-	
-	
+
+
 	public int userDelete(String Name) // 직원정보 삭제
 	{
 		int result = 0;
@@ -184,7 +184,7 @@ public class DAO {
 	}
 
 	public int userUpdate_add(String Name, String Text) // 직원정보 갱신 - 원래 주소, 성별, 급여도 ?로 입력받아서 구하는 하나의 함수로 만들었으나, 이럴경우
-														// 'address' 형식으로 입력되서 에러발생 -> 어쩔수없이 세개로 나눔(데이터 갱신1.png 참조)
+	// 'address' 형식으로 입력되서 에러발생 -> 어쩔수없이 세개로 나눔(데이터 갱신1.png 참조)
 	{
 		int result = 0;
 		try {

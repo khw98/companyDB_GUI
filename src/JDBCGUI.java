@@ -3,6 +3,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.util.*;
+import java.util.List;
 
 public class JDBCGUI extends JFrame implements ActionListener {
 
@@ -231,15 +232,32 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		{
 			String range = searchRangeComboBox.getSelectedItem().toString();
 			int selectedAttributeCnt=0;
-			attribute = new String[10];
+			List<String> dynamicAttributes = new ArrayList<String>();
 			for(int i=0; i<checkBoxesAttributes.length; i++)
 			{
 				if(checkBoxesAttributes[i].isSelected()==true)
 				{
-					attribute[selectedAttributeCnt++] = checkBoxesAttributes[i].getText();
-					System.out.println(checkBoxesAttributes[i].getText());
+					dynamicAttributes.add(checkBoxesAttributes[i].getText());
+					//System.out.println(checkBoxesAttributes[i].getText());
+					selectedAttributeCnt++;
 				}
 			}
+			dynamicAttributes.add("선택");
+			attribute = new String[dynamicAttributes.size()];
+			for(int i=0; i < attribute.length; i++)
+			{
+				attribute[i] = dynamicAttributes.get(i);
+			}
+			//attribute[dynamicAttributes.size()+1] = "선택";
+
+			remove(jsp);//새로운 checkbox Attribute 기반의 테이블을 추가하기 위한 제거
+			dft = new DefaultTableModel(attribute, 0); // DefaultTableModel 이용하여 jtable에 데이터 저장
+			JTable jt = new JTable(dft);
+			JScrollPane jsp = new JScrollPane(jt);
+
+			jsp.setBounds(0, 75, 1000, 500);
+			add(jsp); // 데이터 출력
+
 			if (range.equals("전체")) { // 이름 순 정렬 가능
 				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString());
 				if (dft.getRowCount() > 0)
