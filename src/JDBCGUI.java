@@ -230,7 +230,16 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		else if (e.getSource() == search) // 검색버튼 클릭시 attribute 출력
 		{
 			String range = searchRangeComboBox.getSelectedItem().toString();
-
+			int selectedAttributeCnt=0;
+			attribute = new String[10];
+			for(int i=0; i<checkBoxesAttributes.length; i++)
+			{
+				if(checkBoxesAttributes[i].isSelected()==true)
+				{
+					attribute[selectedAttributeCnt++] = checkBoxesAttributes[i].getText();
+					System.out.println(checkBoxesAttributes[i].getText());
+				}
+			}
 			if (range.equals("전체")) { // 이름 순 정렬 가능
 				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString());
 				if (dft.getRowCount() > 0)
