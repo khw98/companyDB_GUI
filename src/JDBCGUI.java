@@ -196,10 +196,10 @@ public class JDBCGUI extends JFrame implements ActionListener {
 
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		new JDBCGUI();
-	}
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//		new JDBCGUI();
+//	}
 
 	// 직원 선택 체크 박스
 	DefaultTableCellRenderer dcr = new DefaultTableCellRenderer() {
@@ -216,6 +216,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 	public void tableColumnSize(int a) {
 		jt.getColumnModel().getColumn(a).setWidth(0);
 	}
+	public String[] getAttribute(){ return attribute;}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -259,32 +260,32 @@ public class JDBCGUI extends JFrame implements ActionListener {
 			add(jsp); // 데이터 출력
 
 			if (range.equals("전체")) { // 이름 순 정렬 가능
-				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString());
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (range.equals("부서")) { // 이름 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(),
-						departmentComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString());
+						departmentComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (range.equals("성별")) { // 이름 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(),
-						genderComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString());
+						genderComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (range.equals("연봉")) { // 연봉 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(), salaryTextField.getText(),
-						orderComboBox.getSelectedItem().toString());
+						orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (range.equals("생일")) { // 생일 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(),
-						birthComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString());
+						birthComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (range.equals("부하직원")) { // 직원 번호 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(), subordinateTextField.getText(),
-						orderComboBox.getSelectedItem().toString());
+						orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			}
@@ -298,7 +299,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				dao.userDelete(str.toString());
 			} // 기존의 jt.getSelectedRow 메소드를 대체하여 리스트의 행들로 삭제
 
-			dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString()); // 직원정보 삭제 후 테이블 다시 출력
+			dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute); // 직원정보 삭제 후 테이블 다시 출력
 			if (dft.getRowCount() > 0)
 				jt.setRowSelectionInterval(0, 0);
 		}
@@ -312,7 +313,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				Object value = jt.getValueAt(row, 0);
 				dao.userUpdate_add(value.toString(), upText.getText());
 
-				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString()); // 직원정보 갱신 후 테이블 다시 출력
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute); // 직원정보 갱신 후 테이블 다시 출력
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (Item.equals("Sex")) {
@@ -320,7 +321,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				Object value = jt.getValueAt(row, 0);
 				dao.userUpdate_sex(value.toString(), upText.getText());
 
-				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString());
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (Item.equals("Salary")) {
@@ -328,7 +329,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				Object value = jt.getValueAt(row, 0);
 				dao.userUpdate_sal(value.toString(), upText.getText());
 
-				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString());
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			}
@@ -374,6 +375,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		/* 2번문제(검색범위, 검색항목) 위한 이벤트 필요 */
 
 	}
+
 
 
 

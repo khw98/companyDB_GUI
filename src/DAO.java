@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
 public class DAO {
@@ -6,6 +8,8 @@ public class DAO {
 	Statement st;
 	PreparedStatement ps;
 	ResultSet rs;
+
+	String[] originalAttribute = { "Name", "Ssn", "Bdate", "Address", "Sex", "Salary", "Supervisor", "Department", "선택" };
 
 	public DAO() // 생성자
 	{
@@ -59,7 +63,7 @@ public class DAO {
 
 	}
 
-	public void userSelectAll(DefaultTableModel t_model, String ord) // 모든 attribute 출력
+	public void userSelectAll(DefaultTableModel t_model, String ord, String attribute[]) // 모든 attribute 출력
 	{
 		try {
 			st = con.createStatement();
@@ -81,9 +85,32 @@ public class DAO {
 			}
 
 			while (rs.next()) {
-				Object data[] = { rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
-						rs.getString(6), rs.getString(7), rs.getString(8), Boolean.FALSE };
-				t_model.addRow(data); // DefaultTableModel에 tuple 추가
+//				Object data[] = { rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),rs.getString(5),
+//						rs.getString(6), rs.getString(7), rs.getString(8), Boolean.FALSE };
+
+				List<String> rsAttributes = new ArrayList<String>();
+
+				for(int i=0; i < attribute.length-1; i++)
+				{
+					//System.out.println(attribute[i]);
+					for(int j=i; j<originalAttribute.length-1; j++)
+					{
+						if(attribute[i]==originalAttribute[j])
+						{
+							//System.out.println(attribute[i] + " : " + i + " at " + originalAttribute[j] + " here " + j );
+							rsAttributes.add(rs.getString(j+1));
+							break;
+						}
+					}
+				}
+				String rsString[] = new String[rsAttributes.size()];
+				for(int i=0; i < rsString.length; i++) rsString[i] = rsAttributes.get(i);//동적으로 rsString을 만든다.
+
+				Object data[] = new Object[rsString.length+1];
+				for(int i=0; i< rsString.length; i++) data[i] = rsString[i];
+				data[rsString.length] = Boolean.FALSE;
+				//System.out.println(rsString.length-1 + "     " + data[rsString.length-1] );
+				t_model.addRow(data);
 			}
 
 		} catch (SQLException e) {
@@ -94,7 +121,7 @@ public class DAO {
 	}
 
 	// 검색 범위
-	public void userSelect(DefaultTableModel t_model, String sel, String Text, String ord) {
+	public void userSelect(DefaultTableModel t_model, String sel, String Text, String ord, String[] attribute) {
 		try {
 			st = con.createStatement();
 
@@ -150,9 +177,29 @@ public class DAO {
 			}
 
 			while (rs.next()) {
-				Object data[] = { rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
-						rs.getString(6), rs.getString(7), rs.getString(8), Boolean.FALSE };
-				t_model.addRow(data); // DefaultTableModel에 tuple 추가
+				List<String> rsAttributes = new ArrayList<String>();
+
+				for(int i=0; i < attribute.length-1; i++)
+				{
+					//System.out.println(attribute[i]);
+					for(int j=i; j<originalAttribute.length-1; j++)
+					{
+						if(attribute[i]==originalAttribute[j])
+						{
+							//System.out.println(attribute[i] + " : " + i + " at " + originalAttribute[j] + " here " + j );
+							rsAttributes.add(rs.getString(j+1));
+							break;
+						}
+					}
+				}
+				String rsString[] = new String[rsAttributes.size()];
+				for(int i=0; i < rsString.length; i++) rsString[i] = rsAttributes.get(i);//동적으로 rsString을 만든다.
+
+				Object data[] = new Object[rsString.length+1];
+				for(int i=0; i< rsString.length; i++) data[i] = rsString[i];
+				data[rsString.length] = Boolean.FALSE;
+				//System.out.println(rsString.length-1 + "     " + data[rsString.length-1] );
+				t_model.addRow(data);
 			}
 
 		} catch (SQLException e) {
