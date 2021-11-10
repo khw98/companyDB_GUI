@@ -3,6 +3,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.util.*;
+import java.util.List;
 
 public class JDBCGUI extends JFrame implements ActionListener {
 
@@ -19,15 +20,17 @@ public class JDBCGUI extends JFrame implements ActionListener {
 	JTextField subordinateTextField = new JTextField();
 	JCheckBox[] checkBoxesAttributes = new JCheckBox[checkBoxOptions.length];
 	ArrayList<Integer> selectedCheckBoxList = new ArrayList<Integer>(); // 테이블에서 클릭한 row를 저장하기 위한 리스트
-
+	JLabel orderLabel = new JLabel("정렬:");
 	JComboBox<String> searchRangeComboBox = new JComboBox<String>(searchRangeOptions); // searchRangeComboBOx
+	String orderOptions[] = { "정렬 없음", "오름차순", "내림차순" };
+	JComboBox<String> orderComboBox = new JComboBox<String>(orderOptions);
 
 	String[] attribute = {"NAME", "SSN", "BDATE", "ADDRESS", "SEX", "SALARY", "SUPERVISOR", "DEPARTMENT", "선택"}; // 출력할 attribute들
 	//String[] attribute = new String[10];
 	DefaultTableModel dft = new DefaultTableModel(attribute, 0); // DefaultTableModel 이용하여 jtable에 데이터 저장
 	JTable jt = new JTable(dft);
 	JScrollPane jsp = new JScrollPane(jt);
-	
+
 	JCheckBox jc = new JCheckBox();
 	JLabel selectperson;
 
@@ -127,8 +130,8 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		for (int i = 0; i < checkBoxOptions.length; i++) {
 			checkBoxesAttributes[i] = new JCheckBox(checkBoxOptions[i], true);
 			if(i == 0) {
-			checkBoxesAttributes[i].setBounds(80, 40, 90, 20);
-			add(checkBoxesAttributes[i]);
+				checkBoxesAttributes[i].setBounds(80, 40, 90, 20);
+				add(checkBoxesAttributes[i]);
 			} else {
 				oldXposition += 95;
 				checkBoxesAttributes[i].setBounds(oldXposition, 40, 95, 20);
@@ -164,6 +167,8 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		update.setBounds(565, 600, 85, 30);
 		delete.setBounds(800, 600, 150, 30);
 		search.setBounds(880, 40, 100, 25);
+		orderLabel.setBounds(330, 10, 40, 25);
+		orderComboBox.setBounds(380, 10, 90, 25);
 
 		add(jsp); // 데이터 출력
 		add(combo); // 수정항목
@@ -172,6 +177,11 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		add(update); // UPDATE 버튼
 		add(delete); // 삭제버 튼
 		add(search); // 검색 버튼
+		add(orderLabel);//정렬 라벨
+		add(orderComboBox);//정렬 콤보박스
+
+
+
 
 		super.setSize(1000, 800);
 		super.setVisible(true);
@@ -186,15 +196,15 @@ public class JDBCGUI extends JFrame implements ActionListener {
 
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		new JDBCGUI();
-	}
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//		new JDBCGUI();
+//	}
 
 	// 직원 선택 체크 박스
 	DefaultTableCellRenderer dcr = new DefaultTableCellRenderer() {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
+													   int row, int column) {
 			JCheckBox jc = new JCheckBox();
 			jc.setSelected(((Boolean) value).booleanValue());
 			jc.setHorizontalAlignment(JLabel.CENTER);
@@ -202,11 +212,12 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		}
 	};
 
-	
+
 	public void tableColumnSize(int a) {
 		jt.getColumnModel().getColumn(a).setWidth(0);
 	}
-	
+	public String[] getAttribute(){ return attribute;}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -221,49 +232,64 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		else if (e.getSource() == search) // 검색버튼 클릭시 attribute 출력
 		{
 			String range = searchRangeComboBox.getSelectedItem().toString();
-			String newAttributes[] = new String[10];
-			//System.out.println(range);
-			int selectedCnt = 0;
-			for(int i=0; i<checkBoxOptions.length; i++)
+			int selectedAttributeCnt=0;
+			List<String> dynamicAttributes = new ArrayList<String>();
+			for(int i=0; i<checkBoxesAttributes.length; i++)
 			{
-				if(checkBoxesAttributes[i].isSelected())
+				if(checkBoxesAttributes[i].isSelected()==true)
 				{
-					newAttributes[selectedCnt++] = checkBoxesAttributes[i].getText();
+					dynamicAttributes.add(checkBoxesAttributes[i].getText());
+					//System.out.println(checkBoxesAttributes[i].getText());
+					selectedAttributeCnt++;
 				}
 			}
-			newAttributes[selectedCnt] = "선택";
-			DefaultTableModel newDft = new DefaultTableModel(newAttributes, 0);
-			jt = new JTable(newDft);
-			jt.getColumn("선택").setCellRenderer(dcr);
-			jt.getColumn("선택").setCellEditor(new DefaultCellEditor(jc));
-			if (range.equals("전체")) {
-				dao.userSelectAll(dft);
+			dynamicAttributes.add("선택");
+			attribute = new String[dynamicAttributes.size()];
+			for(int i=0; i < attribute.length; i++)
+			{
+				attribute[i] = dynamicAttributes.get(i);
+			}
+			//attribute[dynamicAttributes.size()+1] = "선택";
+
+			remove(jsp);//새로운 checkbox Attribute 기반의 테이블을 추가하기 위한 제거
+			dft = new DefaultTableModel(attribute, 0); // DefaultTableModel 이용하여 jtable에 데이터 저장
+			JTable jt = new JTable(dft);
+			JScrollPane jsp = new JScrollPane(jt);
+
+			jsp.setBounds(0, 75, 1000, 500);
+			add(jsp); // 데이터 출력
+
+			if (range.equals("전체")) { // 이름 순 정렬 가능
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
-			} else if (range.equals("부서")) {
+			} else if (range.equals("부서")) { // 이름 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(),
-						departmentComboBox.getSelectedItem().toString());
+						departmentComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
-			} else if (range.equals("성별")) {
+			} else if (range.equals("성별")) { // 이름 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(),
-						genderComboBox.getSelectedItem().toString());
+						genderComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
-			} else if (range.equals("연봉")) {
-				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(), salaryTextField.getText());
+			} else if (range.equals("연봉")) { // 연봉 순 정렬 가능
+				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(), salaryTextField.getText(),
+						orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
-			} else if (range.equals("생일")) {
+			} else if (range.equals("생일")) { // 생일 순 정렬 가능
 				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(),
-						birthComboBox.getSelectedItem().toString());
+						birthComboBox.getSelectedItem().toString(), orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
-			} else if (range.equals("부하직원")) {
-				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(), subordinateTextField.getText());
+			} else if (range.equals("부하직원")) { // 직원 번호 순 정렬 가능
+				dao.userSelect(dft, searchRangeComboBox.getSelectedItem().toString(), subordinateTextField.getText(),
+						orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			}
+
 		}
 
 		else if (e.getSource() == delete) {// 종료 메뉴아이템 클릭
@@ -273,7 +299,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				dao.userDelete(str.toString());
 			} // 기존의 jt.getSelectedRow 메소드를 대체하여 리스트의 행들로 삭제
 
-			dao.userSelectAll(dft); // 직원정보 삭제 후 테이블 다시 출력
+			dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute); // 직원정보 삭제 후 테이블 다시 출력
 			if (dft.getRowCount() > 0)
 				jt.setRowSelectionInterval(0, 0);
 		}
@@ -287,7 +313,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				Object value = jt.getValueAt(row, 0);
 				dao.userUpdate_add(value.toString(), upText.getText());
 
-				dao.userSelectAll(dft); // 직원정보 갱신 후 테이블 다시 출력
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute); // 직원정보 갱신 후 테이블 다시 출력
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (Item.equals("Sex")) {
@@ -295,7 +321,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				Object value = jt.getValueAt(row, 0);
 				dao.userUpdate_sex(value.toString(), upText.getText());
 
-				dao.userSelectAll(dft);
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			} else if (Item.equals("Salary")) {
@@ -303,7 +329,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 				Object value = jt.getValueAt(row, 0);
 				dao.userUpdate_sal(value.toString(), upText.getText());
 
-				dao.userSelectAll(dft);
+				dao.userSelectAll(dft, orderComboBox.getSelectedItem().toString(), attribute);
 				if (dft.getRowCount() > 0)
 					jt.setRowSelectionInterval(0, 0);
 			}
@@ -349,6 +375,7 @@ public class JDBCGUI extends JFrame implements ActionListener {
 		/* 2번문제(검색범위, 검색항목) 위한 이벤트 필요 */
 
 	}
+
 
 
 
